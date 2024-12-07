@@ -1,0 +1,22 @@
+# book_recommendation.py
+
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def recommend_books(user_preference, books_csv):
+    books = pd.read_csv(books_csv)
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(books["description"])
+    
+    user_vector = vectorizer.transform([user_preference])
+    similarity_scores = cosine_similarity(user_vector, tfidf_matrix).flatten()
+    
+    books["score"] = similarity_scores
+    recommendations = books.sort_values(by="score", ascending=False).head(5)
+    return recommendations[["title", "genre", "score"]]
+
+# Usage
+user_input = "I like fantasy books with magic and adventure."
+recommendations = recommend_books(user_input, "books.csv")
+print(recommendations)
